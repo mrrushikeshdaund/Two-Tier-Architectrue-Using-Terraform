@@ -88,3 +88,35 @@ resource "aws_route_table_association" "Private_route" {
     subnet_id = aws_subnet.PrivateSubnet.id
     route_table_id = aws_route_table.PrivateRouteTable.id
 }
+
+resource "aws_instance" "web-server" {
+    ami = "ami-05fa00d4c63e32376"
+    instance_type = "t2.micro"
+    subnet_id = aws_subnet.PublicSubnet.id
+    vpc_security_group_ids = [aws_security_group.allow-web-traffic.id]
+    
+    tags = {
+        "Name" = "Web-Server"
+    }
+}
+
+
+resource "aws_security_group" "allow-web-traffic" {
+    name = "allow-web-traffic"
+    description = "Allow web inbound traffic from Internet Users"
+    vpc_id = aws_vpc.My-VPC.id
+    ingress {
+        description = "Allow Http Traffic "
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        description = "Allow all type of outbound traffic"
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
